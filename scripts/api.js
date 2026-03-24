@@ -63,3 +63,39 @@ export const changeLikeCardStatus = (cardID, isLiked) => {
   }).then((res) => getResponseData(res));
 };
 
+const formatDate = (date) =>
+  date.toLocaleDateString("ru-RU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+const handleLogoClick = () => {
+  // 1. Сначала очищаем список в модальном окне от старых данных
+  usersStatsModalInfoList.innerHTML = '';
+
+  // 2. Получаем актуальный список карточек
+  getCardList()
+    .then((cards) => {
+      // Последняя созданная (первая в массиве от сервера)
+      const lastCardDate = new Date(cards[0].createdAt);
+      // Самая первая созданная (последняя в массиве от сервера)
+      const firstCardDate = new Date(cards[cards.length - 1].createdAt);
+
+      // 3. Наполняем модальное окно через вспомогательную функцию createInfoString
+      usersStatsModalInfoList.append(
+        createInfoString("Первая создана:", formatDate(firstCardDate))
+      );
+      usersStatsModalInfoList.append(
+        createInfoString("Последняя создана:", formatDate(lastCardDate))
+      );
+      
+      // 4. Открываем модальное окно
+      openModalWindow(usersStatsModalWindow);
+    })
+    .catch((err) => {
+      console.log(`Ошибка при получении статистики: ${err}`);
+    });
+};
+
+logoElement.addEventListener('click', handleLogoClick);
