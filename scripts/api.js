@@ -10,13 +10,13 @@ const getResponseData = (res) => {
   return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
 };
 
-export const getUserInfo = () => {
+const getUserInfo = () => {
   return fetch(`${config.baseUrl}/users/me`, { // Запрос к API-серверу
     headers: config.headers, // Подставляем заголовки
   }).then(getResponseData);  // Проверяем успешность выполнения запроса
 };
 
-export const setUserInfo = ({ name, about }) => {
+const setUserInfo = ({ name, about }) => {
   return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
     headers: config.headers,
@@ -27,13 +27,13 @@ export const setUserInfo = ({ name, about }) => {
   }).then(getResponseData);
 };
 
-export const getCardList = () => {
+const getCardList = () => {
   return fetch(`${config.baseUrl}/cards`, {
     headers: config.headers,
   }).then(getResponseData);
 };
 
-export const updateAvatar = ({ avatar }) => {
+const updateAvatar = ({ avatar }) => {
   return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: "PATCH",
     headers: config.headers,
@@ -41,7 +41,7 @@ export const updateAvatar = ({ avatar }) => {
   }).then(getResponseData);
 };
 
-export const addCard = ({ name, link }) => {
+const addCard = ({ name, link }) => {
   return fetch(`${config.baseUrl}/cards`, {
     method: "POST",
     headers: config.headers,
@@ -49,53 +49,26 @@ export const addCard = ({ name, link }) => {
   }).then(getResponseData);
 };
 
-export const deleteCard = (cardId) => {
+const deleteCard = (cardId) => {
   return fetch(`${config.baseUrl}/cards/${cardId}`, {
     method: "DELETE",
     headers: config.headers,
   }).then(getResponseData);
 };
 
-export const changeLikeCardStatus = (cardID, isLiked) => {
+const changeLikeCardStatus = (cardID, isLiked) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardID}`, {
     method: isLiked ?  "DELETE" : "PUT",
     headers: config.headers,
   }).then((res) => getResponseData(res));
 };
 
-const formatDate = (date) =>
-  date.toLocaleDateString("ru-RU", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-const handleLogoClick = () => {
-  // 1. Сначала очищаем список в модальном окне от старых данных
-  usersStatsModalInfoList.innerHTML = '';
-
-  // 2. Получаем актуальный список карточек
-  getCardList()
-    .then((cards) => {
-      // Последняя созданная (первая в массиве от сервера)
-      const lastCardDate = new Date(cards[0].createdAt);
-      // Самая первая созданная (последняя в массиве от сервера)
-      const firstCardDate = new Date(cards[cards.length - 1].createdAt);
-
-      // 3. Наполняем модальное окно через вспомогательную функцию createInfoString
-      usersStatsModalInfoList.append(
-        createInfoString("Первая создана:", formatDate(firstCardDate))
-      );
-      usersStatsModalInfoList.append(
-        createInfoString("Последняя создана:", formatDate(lastCardDate))
-      );
-      
-      // 4. Открываем модальное окно
-      openModalWindow(usersStatsModalWindow);
-    })
-    .catch((err) => {
-      console.log(`Ошибка при получении статистики: ${err}`);
-    });
+export const api = {
+  getUserInfo,
+  setUserInfo,
+  getCardList,
+  updateAvatar,
+  addCard,
+  deleteCard,
+  changeLikeCardStatus,
 };
-
-logoElement.addEventListener('click', handleLogoClick);
