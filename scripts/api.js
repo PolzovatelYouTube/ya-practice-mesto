@@ -53,11 +53,11 @@ const deleteCard = (cardId) => {
   }).then(getResponseData);
 };
 
-const changeLikeCardStatus = (cardID, isLiked) => {
-  return fetch(`${config.baseUrl}/cards/likes/${cardID}`, {
+const changeLikeCardStatus = (cardId, isLiked) => {
+  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: isLiked ? "DELETE" : "PUT",
     headers: config.headers,
-  }).then((res) => getResponseData(res));
+  }).then(getResponseData);
 };
 
 export const api = {

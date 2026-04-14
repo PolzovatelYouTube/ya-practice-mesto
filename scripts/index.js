@@ -6,7 +6,7 @@ const profileAvatarButton = document.querySelector(".profile__image");
 const logo = document.querySelector(".header__logo, .logo");
 
 const placesList = document.querySelector(".places__list");
-const cardTemplate = document.querySelector("#card-template, .template")?.content;
+const cardTemplate = document.querySelector(".template").content;
 
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
@@ -118,7 +118,9 @@ const checkInputValidity = (formElement, inputElement, settings) => {
   hideInputError(formElement, inputElement, settings);
 };
 
-const hasInvalidInput = (inputList) => inputList.some((inputElement) => !inputElement.validity.valid);
+const hasInvalidInput = (inputList) => {
+  return inputList.some((inputElement) => !inputElement.validity.valid);
+};
 
 const disableSubmitButton = (buttonElement, settings) => {
   if (!buttonElement) return;
@@ -134,19 +136,23 @@ const enableSubmitButton = (buttonElement, settings) => {
 
 const toggleButtonState = (inputList, buttonElement, settings) => {
   if (!buttonElement) return;
+
   if (hasInvalidInput(inputList)) {
     disableSubmitButton(buttonElement, settings);
     return;
   }
+
   enableSubmitButton(buttonElement, settings);
 };
 
 const setEventListeners = (formElement, settings) => {
   const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
   const buttonElement = formElement.querySelector(settings.submitButtonSelector);
+
   if (!buttonElement) return;
 
   toggleButtonState(inputList, buttonElement, settings);
+
   inputList.forEach((inputElement) => {
     inputElement.addEventListener("input", () => {
       checkInputValidity(formElement, inputElement, settings);
@@ -157,6 +163,7 @@ const setEventListeners = (formElement, settings) => {
 
 const clearValidation = (formElement, settings) => {
   if (!formElement) return;
+
   const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
   const buttonElement = formElement.querySelector(settings.submitButtonSelector);
 
@@ -164,45 +171,62 @@ const clearValidation = (formElement, settings) => {
     inputElement.setCustomValidity("");
     hideInputError(formElement, inputElement, settings);
   });
+
   disableSubmitButton(buttonElement, settings);
 };
 
 const enableValidation = (settings) => {
   const formList = Array.from(document.querySelectorAll(settings.formSelector));
+
   formList.forEach((formElement) => {
     if (formElement.name === "remove-card") {
       return;
     }
+
     setEventListeners(formElement, settings);
   });
 };
 
-const formatDate = (date) =>
-  date.toLocaleDateString("ru-RU", {
+const formatDate = (date) => {
+  return date.toLocaleDateString("ru-RU", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+};
 
 const createInfoString = (name, value) => {
   if (!definitionTemplate) return document.createElement("div");
-  const infoNode = definitionTemplate.querySelector(".popup-info__definition-item").cloneNode(true);
+
+  const infoNode = definitionTemplate
+    .querySelector(".popup-info__definition-item")
+    .cloneNode(true);
+
   infoNode.querySelector(".popup-info__definition-name").textContent = name;
   infoNode.querySelector(".popup-info__definition-value").textContent = value;
+
   return infoNode;
 };
 
 const createUserPreview = (user) => {
   if (!userPreviewTemplate) return document.createElement("div");
-  const userNode = userPreviewTemplate.querySelector(".popup-info__user-item").cloneNode(true);
+
+  const userNode = userPreviewTemplate
+    .querySelector(".popup-info__user-item")
+    .cloneNode(true);
+
   const avatar = userNode.querySelector(".popup-info__user-avatar");
   avatar.src = user.avatar;
   avatar.alt = user.name;
+
   userNode.querySelector(".popup-info__user-name").textContent = user.name;
+
   return userNode;
 };
 
-const isCardLiked = (likes, userId) => likes.some((user) => user._id === userId);
+const isCardLiked = (likes, userId) => {
+  return likes.some((user) => user._id === userId);
+};
 
 const updateCardLikes = (cardElement, cardData) => {
   const likeButton = cardElement.querySelector(".card__like-button");
@@ -210,6 +234,7 @@ const updateCardLikes = (cardElement, cardData) => {
   const liked = isCardLiked(cardData.likes, currentUserId);
 
   likeButton.classList.toggle("card__like-button_active", liked);
+
   if (likeCounter) {
     likeCounter.textContent = String(cardData.likes.length);
   }
@@ -217,16 +242,16 @@ const updateCardLikes = (cardElement, cardData) => {
 
 const handleImageClick = (name, link) => {
   if (!popupImageElement || !popupImageCaption) return;
+
   popupImageElement.src = link;
   popupImageElement.alt = name;
   popupImageCaption.textContent = name;
+
   openModalWindow(popupImage);
 };
 
 const createCard = (cardData) => {
-  if (!cardTemplate) return document.createElement("li");
-  const cardRoot = cardTemplate.querySelector(".places__item, .card");
-  const cardElement = cardRoot.cloneNode(true);
+  const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
   const image = cardElement.querySelector(".card__image");
   const title = cardElement.querySelector(".card__title");
   const deleteButton = cardElement.querySelector(".card__delete-button");
@@ -242,8 +267,9 @@ const createCard = (cardData) => {
     handleImageClick(cardData.name, cardData.link);
   });
 
-  likeButton?.addEventListener("click", () => {
+  likeButton.addEventListener("click", () => {
     const liked = isCardLiked(cardData.likes, currentUserId);
+
     api.changeLikeCardStatus(cardData._id, liked)
       .then((updatedCard) => {
         cardData.likes = updatedCard.likes;
@@ -254,16 +280,14 @@ const createCard = (cardData) => {
       });
   });
 
-  if (deleteButton) {
-    if (cardData.owner._id !== currentUserId) {
-      deleteButton.remove();
-    } else {
-      deleteButton.addEventListener("click", () => {
-        cardIdToRemove = cardData._id;
-        cardElementToRemove = cardElement;
-        openModalWindow(popupRemoveCard);
-      });
-    }
+  if (cardData.owner._id !== currentUserId) {
+    deleteButton.remove();
+  } else {
+    deleteButton.addEventListener("click", () => {
+      cardIdToRemove = cardData._id;
+      cardElementToRemove = cardElement;
+      openModalWindow(popupRemoveCard);
+    });
   }
 
   return cardElement;
@@ -271,6 +295,7 @@ const createCard = (cardData) => {
 
 const renderCards = (cards) => {
   if (!placesList) return;
+
   placesList.replaceChildren();
   cards.forEach((card) => {
     placesList.append(createCard(card));
@@ -278,9 +303,9 @@ const renderCards = (cards) => {
 };
 
 const setProfileData = (userData) => {
-  if (profileTitle) profileTitle.textContent = userData.name;
-  if (profileDescription) profileDescription.textContent = userData.about;
-  if (profileImage) profileImage.style.backgroundImage = `url('${userData.avatar}')`;
+  profileTitle.textContent = userData.name;
+  profileDescription.textContent = userData.about;
+  profileImage.style.backgroundImage = `url('${userData.avatar}')`;
 };
 
 const handleProfileFormSubmit = (evt) => {
@@ -288,6 +313,7 @@ const handleProfileFormSubmit = (evt) => {
   const submitButton = evt.submitter;
 
   setLoadingState(submitButton, true, "Сохранить", "Сохранение...");
+
   api.setUserInfo({
     name: profileNameInput.value,
     about: profileDescriptionInput.value,
@@ -309,7 +335,11 @@ const handleAddCardSubmit = (evt) => {
   const submitButton = evt.submitter;
 
   setLoadingState(submitButton, true, "Создать", "Создание...");
-  api.addCard({ name: cardNameInput.value, link: cardLinkInput.value })
+
+  api.addCard({
+    name: cardNameInput.value,
+    link: cardLinkInput.value,
+  })
     .then((newCard) => {
       placesList.prepend(createCard(newCard));
       cardForm.reset();
@@ -328,6 +358,7 @@ const handleAvatarFormSubmit = (evt) => {
   const submitButton = evt.submitter;
 
   setLoadingState(submitButton, true, "Сохранить", "Сохранение...");
+
   api.updateAvatar({ avatar: avatarInput.value })
     .then((userData) => {
       setProfileData(userData);
@@ -351,6 +382,7 @@ const handleRemoveCardSubmit = (evt) => {
   }
 
   setLoadingState(submitButton, true, "Да", "Удаление...");
+
   api.deleteCard(cardIdToRemove)
     .then(() => {
       cardElementToRemove.remove();
@@ -367,16 +399,31 @@ const handleRemoveCardSubmit = (evt) => {
 };
 
 const handleLogoClick = () => {
-  if (!popupInfo || !usersStatsModalInfoList || !usersStatsModalUsersList) return;
+  if (!popupInfo || !usersStatsModalInfoList || !usersStatsModalUsersList) {
+    return;
+  }
+
   api.getCardList()
     .then((cards) => {
       usersStatsModalInfoList.replaceChildren();
       usersStatsModalUsersList.replaceChildren();
 
       if (cards.length > 0) {
-        usersStatsModalInfoList.append(createInfoString("Всего карточек:", String(cards.length)));
-        usersStatsModalInfoList.append(createInfoString("Первая создана:", formatDate(new Date(cards[cards.length - 1].createdAt))));
-        usersStatsModalInfoList.append(createInfoString("Последняя создана:", formatDate(new Date(cards[0].createdAt))));
+        usersStatsModalInfoList.append(
+          createInfoString("Всего карточек:", String(cards.length))
+        );
+        usersStatsModalInfoList.append(
+          createInfoString(
+            "Первая создана:",
+            formatDate(new Date(cards[cards.length - 1].createdAt))
+          )
+        );
+        usersStatsModalInfoList.append(
+          createInfoString(
+            "Последняя создана:",
+            formatDate(new Date(cards[0].createdAt))
+          )
+        );
 
         const usersById = new Map();
         cards.forEach((card) => {
@@ -445,5 +492,5 @@ Promise.all([api.getCardList(), api.getUserInfo()])
   .catch((err) => {
     setProfileData(fallbackProfileData);
     console.error("Ошибка загрузки данных с API:", err);
-    console.info("Проверьте правильность baseUrl (cohort) и authorization токена в scripts/api.js");
+    console.info("Проверьте правильность baseUrl (cohort) и authorization токена в api.js");
   });
