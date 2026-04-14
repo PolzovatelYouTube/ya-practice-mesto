@@ -3,10 +3,10 @@ import { api } from "./api.js";
 const profileEditButton = document.querySelector(".profile__edit-button");
 const profileAddButton = document.querySelector(".profile__add-button");
 const profileAvatarButton = document.querySelector(".profile__image");
-const logo = document.querySelector(".logo");
+const logo = document.querySelector(".header__logo, .logo");
 
 const placesList = document.querySelector(".places__list");
-const cardTemplate = document.querySelector(".template").content;
+const cardTemplate = document.querySelector("#card-template, .template")?.content;
 
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
@@ -19,24 +19,25 @@ const popupEditAvatar = document.querySelector(".popup_type_edit-avatar");
 const popupRemoveCard = document.querySelector(".popup_type_remove-card");
 const popupInfo = document.querySelector(".popup_type_info");
 
-const profileForm = popupEditProfile.querySelector(".popup__form");
-const cardForm = popupAddCard.querySelector(".popup__form");
-const avatarForm = popupEditAvatar.querySelector(".popup__form");
-const removeCardForm = popupRemoveCard.querySelector(".popup__form");
+const profileForm = popupEditProfile?.querySelector(".popup__form");
+const cardForm = popupAddCard?.querySelector(".popup__form");
+const avatarForm = popupEditAvatar?.querySelector(".popup__form");
+const removeCardForm = popupRemoveCard?.querySelector(".popup__form");
 
-const profileNameInput = profileForm.querySelector(".popup__input_type_name");
-const profileDescriptionInput = profileForm.querySelector(".popup__input_type_description");
-const cardNameInput = cardForm.querySelector(".popup__input_type_card-name");
-const cardLinkInput = cardForm.querySelector(".popup__input_type_url");
-const avatarInput = avatarForm.querySelector(".popup__input_type_avatar");
+const profileNameInput = profileForm?.querySelector(".popup__input_type_name");
+const profileDescriptionInput = profileForm?.querySelector(".popup__input_type_description");
+const cardNameInput = cardForm?.querySelector(".popup__input_type_card-name");
+const cardLinkInput = cardForm?.querySelector(".popup__input_type_url");
+const avatarInput = avatarForm?.querySelector(".popup__input_type_avatar");
 
-const popupImageElement = popupImage.querySelector(".popup__image");
-const popupImageCaption = popupImage.querySelector(".popup__caption");
+const popupImageElement = popupImage?.querySelector(".popup__image");
+const popupImageCaption = popupImage?.querySelector(".popup__caption");
 
-const usersStatsModalInfoList = popupInfo.querySelector(".popup-info__definition-list");
-const usersStatsModalUsersList = popupInfo.querySelector(".popup-info__users-list");
-const definitionTemplate = document.querySelector("#popup-info-definition-template").content;
-const userPreviewTemplate = document.querySelector("#popup-info-user-preview-template").content;
+const usersStatsModalInfoList = popupInfo?.querySelector(".popup-info__definition-list");
+const usersStatsModalUsersList = popupInfo?.querySelector(".popup-info__users-list");
+const definitionTemplate = document.querySelector("#popup-info-definition-template")?.content;
+const userPreviewTemplate = document.querySelector("#popup-info-user-preview-template")?.content;
+
 const fallbackProfileData = {
   name: "Жак-Ив Кусто",
   about: "Исследователь океана",
@@ -55,14 +56,17 @@ const validationConfig = {
   inputErrorClass: "popup__input_type_error",
   errorClass: "popup__error_visible",
 };
+
 const openedPopupClass = "popup_is-opened";
 
 const openModalWindow = (modal) => {
+  if (!modal) return;
   modal.classList.add(openedPopupClass);
   document.addEventListener("keydown", closeByEsc);
 };
 
 const closeModalWindow = (modal) => {
+  if (!modal) return;
   modal.classList.remove(openedPopupClass);
   document.removeEventListener("keydown", closeByEsc);
 };
@@ -79,11 +83,13 @@ const closeByEsc = (evt) => {
 };
 
 const setLoadingState = (button, isLoading, defaultText, loadingText) => {
+  if (!button) return;
   button.textContent = isLoading ? loadingText : defaultText;
 };
 
 const showInputError = (formElement, inputElement, errorMessage, settings) => {
   const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
+  if (!errorElement) return;
   inputElement.classList.add(settings.inputErrorClass);
   errorElement.textContent = errorMessage;
   errorElement.classList.add(settings.errorClass);
@@ -91,6 +97,7 @@ const showInputError = (formElement, inputElement, errorMessage, settings) => {
 
 const hideInputError = (formElement, inputElement, settings) => {
   const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
+  if (!errorElement) return;
   inputElement.classList.remove(settings.inputErrorClass);
   errorElement.textContent = "";
   errorElement.classList.remove(settings.errorClass);
@@ -111,31 +118,33 @@ const checkInputValidity = (formElement, inputElement, settings) => {
   hideInputError(formElement, inputElement, settings);
 };
 
-const hasInvalidInput = (inputList) =>
-  inputList.some((inputElement) => !inputElement.validity.valid);
+const hasInvalidInput = (inputList) => inputList.some((inputElement) => !inputElement.validity.valid);
 
 const disableSubmitButton = (buttonElement, settings) => {
+  if (!buttonElement) return;
   buttonElement.classList.add(settings.inactiveButtonClass);
   buttonElement.disabled = true;
 };
 
 const enableSubmitButton = (buttonElement, settings) => {
+  if (!buttonElement) return;
   buttonElement.classList.remove(settings.inactiveButtonClass);
   buttonElement.disabled = false;
 };
 
 const toggleButtonState = (inputList, buttonElement, settings) => {
+  if (!buttonElement) return;
   if (hasInvalidInput(inputList)) {
     disableSubmitButton(buttonElement, settings);
     return;
   }
-
   enableSubmitButton(buttonElement, settings);
 };
 
 const setEventListeners = (formElement, settings) => {
   const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
   const buttonElement = formElement.querySelector(settings.submitButtonSelector);
+  if (!buttonElement) return;
 
   toggleButtonState(inputList, buttonElement, settings);
   inputList.forEach((inputElement) => {
@@ -147,6 +156,7 @@ const setEventListeners = (formElement, settings) => {
 };
 
 const clearValidation = (formElement, settings) => {
+  if (!formElement) return;
   const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
   const buttonElement = formElement.querySelector(settings.submitButtonSelector);
 
@@ -175,19 +185,17 @@ const formatDate = (date) =>
   });
 
 const createInfoString = (name, value) => {
-  const infoNode = definitionTemplate
-    .querySelector(".popup-info__definition-item")
-    .cloneNode(true);
-
+  if (!definitionTemplate) return document.createElement("div");
+  const infoNode = definitionTemplate.querySelector(".popup-info__definition-item").cloneNode(true);
   infoNode.querySelector(".popup-info__definition-name").textContent = name;
   infoNode.querySelector(".popup-info__definition-value").textContent = value;
   return infoNode;
 };
 
 const createUserPreview = (user) => {
+  if (!userPreviewTemplate) return document.createElement("div");
   const userNode = userPreviewTemplate.querySelector(".popup-info__user-item").cloneNode(true);
   const avatar = userNode.querySelector(".popup-info__user-avatar");
-
   avatar.src = user.avatar;
   avatar.alt = user.name;
   userNode.querySelector(".popup-info__user-name").textContent = user.name;
@@ -202,10 +210,13 @@ const updateCardLikes = (cardElement, cardData) => {
   const liked = isCardLiked(cardData.likes, currentUserId);
 
   likeButton.classList.toggle("card__like-button_active", liked);
-  likeCounter.textContent = String(cardData.likes.length);
+  if (likeCounter) {
+    likeCounter.textContent = String(cardData.likes.length);
+  }
 };
 
 const handleImageClick = (name, link) => {
+  if (!popupImageElement || !popupImageCaption) return;
   popupImageElement.src = link;
   popupImageElement.alt = name;
   popupImageCaption.textContent = name;
@@ -213,7 +224,9 @@ const handleImageClick = (name, link) => {
 };
 
 const createCard = (cardData) => {
-  const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
+  if (!cardTemplate) return document.createElement("li");
+  const cardRoot = cardTemplate.querySelector(".places__item, .card");
+  const cardElement = cardRoot.cloneNode(true);
   const image = cardElement.querySelector(".card__image");
   const title = cardElement.querySelector(".card__title");
   const deleteButton = cardElement.querySelector(".card__delete-button");
@@ -229,7 +242,7 @@ const createCard = (cardData) => {
     handleImageClick(cardData.name, cardData.link);
   });
 
-  likeButton.addEventListener("click", () => {
+  likeButton?.addEventListener("click", () => {
     const liked = isCardLiked(cardData.likes, currentUserId);
     api.changeLikeCardStatus(cardData._id, liked)
       .then((updatedCard) => {
@@ -241,20 +254,23 @@ const createCard = (cardData) => {
       });
   });
 
-  if (cardData.owner._id !== currentUserId) {
-    deleteButton.remove();
-  } else {
-    deleteButton.addEventListener("click", () => {
-      cardIdToRemove = cardData._id;
-      cardElementToRemove = cardElement;
-      openModalWindow(popupRemoveCard);
-    });
+  if (deleteButton) {
+    if (cardData.owner._id !== currentUserId) {
+      deleteButton.remove();
+    } else {
+      deleteButton.addEventListener("click", () => {
+        cardIdToRemove = cardData._id;
+        cardElementToRemove = cardElement;
+        openModalWindow(popupRemoveCard);
+      });
+    }
   }
 
   return cardElement;
 };
 
 const renderCards = (cards) => {
+  if (!placesList) return;
   placesList.replaceChildren();
   cards.forEach((card) => {
     placesList.append(createCard(card));
@@ -262,9 +278,9 @@ const renderCards = (cards) => {
 };
 
 const setProfileData = (userData) => {
-  profileTitle.textContent = userData.name;
-  profileDescription.textContent = userData.about;
-  profileImage.style.backgroundImage = `url('${userData.avatar}')`;
+  if (profileTitle) profileTitle.textContent = userData.name;
+  if (profileDescription) profileDescription.textContent = userData.about;
+  if (profileImage) profileImage.style.backgroundImage = `url('${userData.avatar}')`;
 };
 
 const handleProfileFormSubmit = (evt) => {
@@ -351,31 +367,26 @@ const handleRemoveCardSubmit = (evt) => {
 };
 
 const handleLogoClick = () => {
+  if (!popupInfo || !usersStatsModalInfoList || !usersStatsModalUsersList) return;
   api.getCardList()
     .then((cards) => {
       usersStatsModalInfoList.replaceChildren();
       usersStatsModalUsersList.replaceChildren();
 
       if (cards.length > 0) {
-        usersStatsModalInfoList.append(
-          createInfoString("Всего карточек:", String(cards.length))
-        );
-        usersStatsModalInfoList.append(
-          createInfoString("Первая создана:", formatDate(new Date(cards[cards.length - 1].createdAt)))
-        );
-        usersStatsModalInfoList.append(
-          createInfoString("Последняя создана:", formatDate(new Date(cards[0].createdAt)))
-        );
+        usersStatsModalInfoList.append(createInfoString("Всего карточек:", String(cards.length)));
+        usersStatsModalInfoList.append(createInfoString("Первая создана:", formatDate(new Date(cards[cards.length - 1].createdAt))));
+        usersStatsModalInfoList.append(createInfoString("Последняя создана:", formatDate(new Date(cards[0].createdAt))));
+
+        const usersById = new Map();
+        cards.forEach((card) => {
+          usersById.set(card.owner._id, card.owner);
+        });
+
+        usersById.forEach((user) => {
+          usersStatsModalUsersList.append(createUserPreview(user));
+        });
       }
-
-      const usersById = new Map();
-      cards.forEach((card) => {
-        usersById.set(card.owner._id, card.owner);
-      });
-
-      usersById.forEach((user) => {
-        usersStatsModalUsersList.append(createUserPreview(user));
-      });
 
       openModalWindow(popupInfo);
     })
@@ -397,30 +408,31 @@ const setupCommonPopupHandlers = () => {
   });
 };
 
-profileEditButton.addEventListener("click", () => {
+profileEditButton?.addEventListener("click", () => {
   profileNameInput.value = profileTitle.textContent;
   profileDescriptionInput.value = profileDescription.textContent;
   clearValidation(profileForm, validationConfig);
   openModalWindow(popupEditProfile);
 });
 
-profileAddButton.addEventListener("click", () => {
+profileAddButton?.addEventListener("click", () => {
   cardForm.reset();
   clearValidation(cardForm, validationConfig);
   openModalWindow(popupAddCard);
 });
 
-profileAvatarButton.addEventListener("click", () => {
+profileAvatarButton?.addEventListener("click", () => {
   avatarForm.reset();
   clearValidation(avatarForm, validationConfig);
   openModalWindow(popupEditAvatar);
 });
 
-logo.addEventListener("click", handleLogoClick);
-profileForm.addEventListener("submit", handleProfileFormSubmit);
-cardForm.addEventListener("submit", handleAddCardSubmit);
-avatarForm.addEventListener("submit", handleAvatarFormSubmit);
-removeCardForm.addEventListener("submit", handleRemoveCardSubmit);
+logo?.addEventListener("click", handleLogoClick);
+profileForm?.addEventListener("submit", handleProfileFormSubmit);
+cardForm?.addEventListener("submit", handleAddCardSubmit);
+avatarForm?.addEventListener("submit", handleAvatarFormSubmit);
+removeCardForm?.addEventListener("submit", handleRemoveCardSubmit);
+
 setupCommonPopupHandlers();
 enableValidation(validationConfig);
 

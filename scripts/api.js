@@ -11,19 +11,16 @@ const getResponseData = (res) => {
 };
 
 const getUserInfo = () => {
-  return fetch(`${config.baseUrl}/users/me`, { // Запрос к API-серверу
-    headers: config.headers, // Подставляем заголовки
-  }).then(getResponseData);  // Проверяем успешность выполнения запроса
+  return fetch(`${config.baseUrl}/users/me`, {
+    headers: config.headers,
+  }).then(getResponseData);
 };
 
 const setUserInfo = ({ name, about }) => {
   return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
     headers: config.headers,
-    body: JSON.stringify({
-      name,
-      about,
-    }),
+    body: JSON.stringify({ name, about }),
   }).then(getResponseData);
 };
 
@@ -58,7 +55,7 @@ const deleteCard = (cardId) => {
 
 const changeLikeCardStatus = (cardID, isLiked) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardID}`, {
-    method: isLiked ?  "DELETE" : "PUT",
+    method: isLiked ? "DELETE" : "PUT",
     headers: config.headers,
   }).then((res) => getResponseData(res));
 };
